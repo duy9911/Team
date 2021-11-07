@@ -35,11 +35,11 @@ func GetAll(domain string) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	staffs, err := clientRedis.MGet(ctx, val...).Result()
+	teams, err := clientRedis.MGet(ctx, val...).Result()
 	if err != nil {
 		return nil, err
 	}
-	return staffs, nil
+	return teams, nil
 }
 
 func Set(key string, value interface{}) error {
@@ -53,10 +53,13 @@ func Set(key string, value interface{}) error {
 	return nil
 }
 
-func Delete(key string) error {
-	err := clientRedis.Del(ctx, key).Err()
+func Delete(key string) (int64, error) {
+	result, err := clientRedis.Del(ctx, key).Result()
 	if err != nil {
-		return err
+		return result, err
 	}
-	return nil
+	if result == 0 {
+		return result, err
+	}
+	return result, nil
 }

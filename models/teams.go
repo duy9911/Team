@@ -1,9 +1,9 @@
 package models
 
 type Team struct {
-	ID     string
-	Name   string
-	Staffs []StaffRecieve
+	ID    string
+	Name  string
+	Staff []StaffRecieve
 }
 
 type StaffRecieve struct {

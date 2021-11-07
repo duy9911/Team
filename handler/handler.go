@@ -5,9 +5,9 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/duy9911/Team/handler/logger"
-	"github.com/duy9911/Team/handler/redis"
 	"github.com/duy9911/Team/models"
+	"github.com/duy9911/Team/pkgs/logger"
+	"github.com/duy9911/Team/pkgs/redis"
 )
 
 type Id struct {
@@ -51,21 +51,18 @@ func UpdateTeam(key string, team models.Team) {
 }
 
 func Deletestaff(key string) {
-	_, err := redis.Get(key)
+	result, err := redis.Delete(key)
 	if err != nil {
-		logger.Logger("error key", errors.New("doesn't match any key"))
+		logger.Logger("error delete", errors.New("error delete "+key))
 		return
 	}
-
-	if err := redis.Delete(key); err != nil {
-		logger.Logger("error delete", err)
-		return
+	if result == 0 {
+		logger.Logger("error delete", errors.New("wrong key "+key))
 	}
 	logger.Logger("deleted ", key)
 }
 
 func validateTeam(team models.Team) error {
-
 	if team.Name == " " {
 		return errors.New("opp! team can not empty")
 	}

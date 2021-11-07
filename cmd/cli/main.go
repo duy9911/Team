@@ -5,20 +5,27 @@ import (
 	"os"
 	"sort"
 
-	"github.com/duy9911/Staff/handler"
-	"github.com/duy9911/Staff/models"
+	"github.com/duy9911/Team/handler"
+	"github.com/duy9911/Team/models"
 	"github.com/urfave/cli/v2"
 )
 
+type TeamReceive struct {
+	ID    string
+	Name  string
+	Staff string
+}
+
 func main() {
-	staff := models.Team{}
+	teamrc := TeamReceive{}
+	team := models.Team{}
 	app := &cli.App{
 		Commands: []*cli.Command{
 			{
 				Name:  "create",
-				Usage: "create staff, eg:  -n <name> -d <1999-09-15> -s <153.0> create  ",
+				Usage: "create team, eg:  -n <name> -d <1999-09-15> -s <153.0> create  ",
 				Action: func(c *cli.Context) error {
-					handler.CreateStaff(staff)
+					handler.CreateTeam(team)
 					return nil
 				},
 			},
@@ -28,24 +35,24 @@ func main() {
 				Usage:   "return all staffs, eg: getall <domain> ",
 				Action: func(c *cli.Context) error {
 					domain := c.Args().First()
-					handler.ReturnStaffs(domain)
+					handler.ReturnTeams(domain)
 					return nil
 				},
 			},
 			{
 				Name:    "update",
 				Aliases: []string{"u"},
-				Usage:   "update, eg: -flag update <staff_id> ",
+				Usage:   "update, eg: -flag update <team_id> ",
 				Action: func(c *cli.Context) error {
 					key := c.Args().First()
-					handler.UpdateStaff(key, staff)
+					handler.UpdateTeam(key, team)
 					return nil
 				},
 			},
 			{
 				Name:    "delete",
 				Aliases: []string{"d"},
-				Usage:   "delete, eg: delete <staff_id>",
+				Usage:   "delete, eg: delete <team_id>",
 				Action: func(c *cli.Context) error {
 					key := c.Args().First()
 					handler.Deletestaff(key)
@@ -58,29 +65,15 @@ func main() {
 				Name:        "name",
 				Aliases:     []string{"n"},
 				Value:       " ",
-				Usage:       "name for staff",
-				Destination: &staff.Name,
+				Usage:       "name for team",
+				Destination: &team.Name,
 			},
 			&cli.StringFlag{
-				Name:        "dob",
-				Aliases:     []string{"d"},
-				Value:       " ",
-				Usage:       "day of birth for staff, following format 2006-01-02",
-				Destination: &staff.Dob,
-			},
-			&cli.StringFlag{
-				Name:        "gender",
-				Aliases:     []string{"g"},
-				Value:       " ",
-				Usage:       "gender of birth for staff, male/female/both..",
-				Destination: &staff.Gender,
-			},
-			&cli.Float64Flag{
-				Name:        "salary",
+				Name:        "staffs",
 				Aliases:     []string{"s"},
-				Value:       0,
-				Usage:       "salary for staff, number only (allow float)",
-				Destination: &staff.Salary,
+				Value:       " ",
+				Usage:       "staffs for your team, eg: '/staff1/staff2/staff3'",
+				Destination: &teamrc.Staff,
 			},
 		},
 	}
