@@ -4,9 +4,10 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/duy9911/Team/handler"
-	"github.com/duy9911/Team/models"
+	models "github.com/duy9911/Team/model"
 	"github.com/urfave/cli/v2"
 )
 
@@ -23,7 +24,7 @@ func main() {
 		Commands: []*cli.Command{
 			{
 				Name:  "create",
-				Usage: "create team, eg:  -n <name> -d <1999-09-15> -s <153.0> create  ",
+				Usage: "create team, eg:  -n <name> create  ",
 				Action: func(c *cli.Context) error {
 					handler.CreateTeam(team)
 					return nil
@@ -32,10 +33,9 @@ func main() {
 			{
 				Name:    "getall",
 				Aliases: []string{"g"},
-				Usage:   "return all staffs, eg: getall <domain> ",
+				Usage:   "return all teams, eg: getall",
 				Action: func(c *cli.Context) error {
-					domain := c.Args().First()
-					handler.ReturnTeams(domain)
+					handler.ReturnTeams()
 					return nil
 				},
 			},
@@ -54,8 +54,22 @@ func main() {
 				Aliases: []string{"d"},
 				Usage:   "delete, eg: delete <team_id>",
 				Action: func(c *cli.Context) error {
-					key := c.Args().First()
-					handler.Deletestaff(key)
+					team_id := c.Args().First()
+					handler.DeleteTeams(team_id)
+					return nil
+				},
+			},
+
+			{
+				Name:    "addstaff",
+				Aliases: []string{"a"},
+				Usage:   "add staff for team which already exists, eg -s <staffs> addstaff <team_id>",
+				Action: func(c *cli.Context) error {
+					team_id := c.Args().First()
+					staffs := strings.Replace(teamrc.Staff, "/", " ", -1)
+					staffsAry := strings.Fields(staffs)
+
+					handler.AddStaffsToTeam(team_id, staffsAry)
 					return nil
 				},
 			},
