@@ -3,12 +3,13 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 
 	models "github.com/duy9911/Team/model"
 	"github.com/duy9911/Team/pkgs/logger"
 	"github.com/duy9911/Team/pkgs/redis"
+	"github.com/duy9911/Team/pkgs/redis/publisher"
+	"github.com/duy9911/Team/pkgs/redis/subscribe"
 )
 
 type Id struct {
@@ -65,8 +66,6 @@ func DeleteTeams(team_id string) {
 
 //add staff
 func AddStaffsToTeam(team_id string, staffs []string) {
-	fmt.Println(staffs)
-	fmt.Println(staffs[1])
 	team, err := prepareStaffsToTeam(team_id, staffs)
 	if err != nil {
 		logger.Logger("error prepare", err)
@@ -79,20 +78,44 @@ func AddStaffsToTeam(team_id string, staffs []string) {
 
 func prepareStaffsToTeam(team_id string, staffs []string) (models.Team, error) {
 	teamStruct := models.Team{}
+	if err := validateStaff(staffs); err != nil {
+		return teamStruct, err
+	}
+
 	team, err := redis.HashGet(team_id)
 	if err != nil {
 		return teamStruct, err
 	}
+
 	errUnmar := json.Unmarshal([]byte(team), &teamStruct)
 	if errUnmar != nil {
 		return teamStruct, err
 	}
+
 	teamUpdated := models.Team{
 		ID:     team_id,
 		Name:   teamStruct.Name,
 		Staffs: staffs,
 	}
 	return teamUpdated, nil
+}
+
+func validateStaff(staff []string) error {
+
+	if err := publisher.Publishing("check_staff", staff); err != nil {
+		return err
+	}
+	for {
+		msg, err := subscribe.Subscribing("validate_result")
+		if err != nil {
+			return err
+		}
+		if msg == true {
+			return nil
+		} else {
+			return errors.New("invalid staff_id")
+		}
+	}
 }
 
 func prepareUpdate(team_id string, team models.Team) (models.Team, error) {
@@ -129,12 +152,6 @@ func prepareTeam(s models.Team) (models.Team, error) {
 	}
 	return team, nil
 }
-
-// team-id: N+1
-// team-id: N+1
-
-// teams: Hashes
-// teams: Hashes
 
 func validateTeam(team models.Team) error {
 	if team.Name == " " {
